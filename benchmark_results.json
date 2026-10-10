@@ -1,0 +1,259 @@
+{
+  "timestamp": "2026-10-09 02:37:29",
+  "qwen": {
+    "model": "qwen3:4b",
+    "cases_tested": 5,
+    "avg_latency_ms": 21553.4,
+    "avg_score": 5.0,
+    "results": [
+      {
+        "case": "leaf",
+        "specimen": "Neem Leaf (Azadirachta indica)",
+        "latency_ms": 20550,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 57,
+        "mission": {
+          "title": "Neem Leaf Texture Study",
+          "instruction": "Observe leaf surface patterns without touching",
+          "why": "Pinnate veins and serrated edges show adaptive water retention in arid climates",
+          "estimated_minutes": 2,
+          "physical_action": "Stand 2 paces back to see full leaf structure",
+          "observation_goal": "Count visible vein intersections on one leaflet",
+          "safety_note": "Never touch plants; observe from distance to avoid disturbance"
+        },
+        "raw_preview": "{\n  \"title\": \"Neem Leaf Texture Study\",\n  \"instruction\": \"Observe leaf surface patterns without touching\",\n  \"why\": \"Pin..."
+      },
+      {
+        "case": "flower",
+        "specimen": "Wild Asteraceae Blossom",
+        "latency_ms": 21107,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 56,
+        "mission": {
+          "title": "Sunflower Disc Pattern",
+          "instruction": "Observe yellow composite blossom surface texture and disc florets without touching",
+          "why": "Disc florets show adaptive radiation for pollination and light capture",
+          "estimated_minutes": 2,
+          "physical_action": "Stand 2 paces back, eyes level",
+          "observation_goal": "Count radial disc florets visible without touching",
+          "safety_note": "Never touch unknown plants; keep distance from all flora"
+        },
+        "raw_preview": "{\n  \"title\": \"Sunflower Disc Pattern\",\n  \"instruction\": \"Observe yellow composite blossom surface texture and disc flore..."
+      },
+      {
+        "case": "rock",
+        "specimen": "Weathered Basalt Stone",
+        "latency_ms": 21659,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 56,
+        "mission": {
+          "title": "Basalt Stone Patterns",
+          "instruction": "Observe stone surface textures and mineral flecks without touching",
+          "why": "Weathering creates unique mineral patterns revealing rock formation history",
+          "estimated_minutes": 2,
+          "physical_action": "Step back 2 paces to see full stone profile",
+          "observation_goal": "Count mineral flecks visible in 20-degree field of view",
+          "safety_note": "Keep phone away; never touch stone surfaces"
+        },
+        "raw_preview": "{\n  \"title\": \"Basalt Stone Patterns\",\n  \"instruction\": \"Observe stone surface textures and mineral flecks without touchi..."
+      },
+      {
+        "case": "tree",
+        "specimen": "Mature Bark Trunk",
+        "latency_ms": 22190,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 57,
+        "mission": {
+          "title": "Bark Texture Study",
+          "instruction": "Observe north-facing moss on mature tree bark without touching",
+          "why": "Moss growth indicates moisture and microclimates on tree trunks",
+          "estimated_minutes": 2,
+          "physical_action": "Stand 2 paces back to see bark patterns clearly",
+          "observation_goal": "Count moss patches on north side",
+          "safety_note": "Do not touch bark or moss; keep distance from tree trunk"
+        },
+        "raw_preview": "{\n  \"title\": \"Bark Texture Study\",\n  \"instruction\": \"Observe north-facing moss on mature tree bark without touching\",\n  ..."
+      },
+      {
+        "case": "unknown_plant",
+        "specimen": "Unidentified Forest Understory Plant",
+        "latency_ms": 22261,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 58,
+        "mission": {
+          "title": "Shade-Seeker Leaf Pattern",
+          "instruction": "Observe leaf veins and surface texture without touching the plant",
+          "why": "Leaf vein patterns indicate water transport efficiency in understory plants",
+          "estimated_minutes": 2,
+          "physical_action": "Stand 2 paces back, eyes level with plant base",
+          "observation_goal": "Count visible leaf veins per leaf",
+          "safety_note": "Never touch unknown plants; keep 10 feet from all vegetation"
+        },
+        "raw_preview": "{\n  \"title\": \"Shade-Seeker Leaf Pattern\",\n  \"instruction\": \"Observe leaf veins and surface texture without touching the ..."
+      }
+    ]
+  },
+  "gemma": {
+    "model": "gemma2:2b",
+    "cases_tested": 5,
+    "avg_latency_ms": 25565.6,
+    "avg_score": 5.0,
+    "results": [
+      {
+        "case": "leaf",
+        "specimen": "Neem Leaf (Azadirachta indica)",
+        "latency_ms": 28251,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 67,
+        "mission": {
+          "title": "Neem Leaf Texture",
+          "instruction": "Crouch down and observe the leaf's surface patterns.  What textures do you notice?",
+          "why": "Examining the leaf's surface textures reveals details about its adaptation to the environment.",
+          "estimated_minutes": 2,
+          "physical_action": "Crouch 2 paces back, look at the leaf",
+          "observation_goal": "Observe the leaf's surface texture and identify unique patterns.",
+          "safety_note": "Keep a safe distance from the leaf and observe it directly."
+        },
+        "raw_preview": "{\n  \"title\": \"Neem Leaf Texture\",\n  \"instruction\": \"Crouch down and observe the leaf's surface patterns.  What textures ..."
+      },
+      {
+        "case": "flower",
+        "specimen": "Wild Asteraceae Blossom",
+        "latency_ms": 24437,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 79,
+        "mission": {
+          "title": "Wild Asteraceae Blooms",
+          "instruction": "Crouch down and observe the surface patterns of the flower's petals.",
+          "why": "These patterns can reveal unique details about the plant's structure and adaptation.",
+          "estimated_minutes": 2,
+          "physical_action": "Crouch 2 paces back, look down at the flower.",
+          "observation_goal": "Notice the intricate patterns on the petals, such as the arrangement of veins or the texture of the surface.",
+          "safety_note": "Remember, observe the flower from a safe distance. Do not touch or disturb the plant."
+        },
+        "raw_preview": "{\n  \"title\": \"Wild Asteraceae Blooms\",\n  \"instruction\": \"Crouch down and observe the surface patterns of the flower's pe..."
+      },
+      {
+        "case": "rock",
+        "specimen": "Weathered Basalt Stone",
+        "latency_ms": 24162,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 77,
+        "mission": {
+          "title": "Weathered Basalt Surface",
+          "instruction": "Crouch down and observe the surface of the basalt stone, noticing its texture and patterns.",
+          "why": "The weathered basalt stone provides insights into geological processes and the interaction of rock with its environment.",
+          "estimated_minutes": 2,
+          "physical_action": "Crouch 2 paces back, observe the stone",
+          "observation_goal": "Identify and describe the surface patterns and texture of the basalt stone.",
+          "safety_note": "Stay on the designated path and avoid disturbing the area around the stone."
+        },
+        "raw_preview": "{\n  \"title\": \"Weathered Basalt Surface\",\n  \"instruction\": \"Crouch down and observe the surface of the basalt stone, noti..."
+      },
+      {
+        "case": "tree",
+        "specimen": "Mature Bark Trunk",
+        "latency_ms": 28258,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 93,
+        "mission": {
+          "title": "Bark Texture Exploration",
+          "instruction": "Crouch down to examine the bark's surface patterns and textures.  Notice the ridges and fissures.",
+          "why": "The bark ridges create micro-habitats for insects and other small creatures, offering a glimpse into the ecosystem's hidden life.",
+          "estimated_minutes": 2,
+          "physical_action": "Crouch 2 paces back, look at the trunk from a lower perspective",
+          "observation_goal": "Identify the patterns and textures of the bark ridges and fissures.",
+          "safety_note": "Stay within the designated area and observe the tree from a safe distance.  Do not touch or disturb the bark or surrounding environment."
+        },
+        "raw_preview": "{\n  \"title\": \"Bark Texture Exploration\",\n  \"instruction\": \"Crouch down to examine the bark's surface patterns and textur..."
+      },
+      {
+        "case": "unknown_plant",
+        "specimen": "Unidentified Forest Understory Plant",
+        "latency_ms": 22720,
+        "score": 5.0,
+        "rubric": {
+          "schema_valid": true,
+          "safety_valid": true,
+          "physical_action_present": true,
+          "observation_goal_present": true,
+          "phone_away_compatible": true
+        },
+        "tokens": 63,
+        "mission": {
+          "title": "Forest Understory Secrets",
+          "instruction": "Crouch down and observe the understory. Notice the patterns and textures of the leaves.",
+          "why": "Understanding the intricate details of the forest understory helps us appreciate the complex ecosystem.",
+          "estimated_minutes": 2,
+          "physical_action": "Crouch 2 paces back",
+          "observation_goal": "Patterns and textures of the leaves",
+          "safety_note": "Stay on the designated path and avoid disturbing any plants or animals."
+        },
+        "raw_preview": "{\n  \"title\": \"Forest Understory Secrets\",\n  \"instruction\": \"Crouch down and observe the understory. Notice the patterns ..."
+      }
+    ]
+  }
+}

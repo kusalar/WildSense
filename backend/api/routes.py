@@ -31,8 +31,10 @@ from services.audio_provider import (
     BrowserAudioProvider,
     MockAudioProvider
 )
+from services.plant_service import PlantService
 
 router = APIRouter()
+
 
 
 # Instantiate core singletons
@@ -56,13 +58,19 @@ class HealthResponse(BaseModel):
     vision_available: bool
     available_models: List[str]
     mode: str
+    onnx_available: bool = False
+    onnx_model: Optional[str] = None
+    specialist_available: bool = False
+    specialist_enabled: bool = False
 
 class ModelSelectRequest(BaseModel):
     model: str
 
 class RecognizeRequest(BaseModel):
     image_base64: Optional[str] = None
+    images_base64: Optional[List[str]] = None
     preset_id: Optional[str] = None
+    organ_type: Optional[str] = "whole_plant"
 
 class RecognizeResponse(BaseModel):
     category: str
@@ -72,6 +80,20 @@ class RecognizeResponse(BaseModel):
     uncertainty: str
     inference_ms: int = 0
     provider: str = "local"
+    scientific_name: Optional[str] = None
+    similarity_score: Optional[float] = None
+    raw_cosine: Optional[float] = None
+    organ_type: Optional[str] = None
+    organ_tip: Optional[str] = None
+    match_level: Optional[str] = None
+    match_details: Optional[str] = None
+    photos_count: int = 1
+    aggregation: Optional[str] = None
+    individual_photos: Optional[List[Dict[str, Any]]] = None
+    candidates: Optional[List[Dict[str, Any]]] = None
+    image_quality: Optional[Dict[str, Any]] = None
+    arbitration: Optional[Dict[str, Any]] = None
+
 
 class MissionRequest(BaseModel):
     object_name: str
@@ -190,11 +212,14 @@ async def health_check():
     available_models = []
     vision_available = False
 
+    onnx_available = await recognizer.is_onnx_available()
     if is_connected:
         available_models = await ollama_provider.list_models()
         if available_models and ollama_provider.model_name not in available_models:
             ollama_provider.set_model(available_models[0])
         vision_available = await recognizer.is_vision_available()
+    else:
+        vision_available = onnx_available
 
     return HealthResponse(
         status="healthy",
@@ -204,8 +229,13 @@ async def health_check():
         vision_model=VISION_MODEL,
         vision_available=vision_available,
         available_models=available_models,
-        mode="local_ollama" if is_connected else "fallback_mock"
+        mode="local_ollama" if is_connected else "fallback_mock",
+        onnx_available=onnx_available,
+        onnx_model="BioCLIP-FastViT-4271 (fp32 ONNX)" if onnx_available else None,
+        specialist_available=recognizer.onnx_botany.specialist_available,
+        specialist_enabled=recognizer.onnx_botany.specialist_enabled
     )
+
 
 @router.get("/models")
 async def get_models():
@@ -249,42 +279,57 @@ async def recognize_object(request: Request):
     if "multipart/form-data" in content_type:
         form = await request.form()
         preset_id = form.get("preset_id")
+        organ_type = form.get("organ_type") or "whole_plant"
+
         if preset_id and str(preset_id).strip():
-            result = await recognizer.recognize(preset_id=str(preset_id))
+            result = await recognizer.recognize(preset_id=str(preset_id), organ_type=str(organ_type))
             return RecognizeResponse(**result)
 
-        file_obj = form.get("image")
-        if not file_obj or not hasattr(file_obj, "read"):
-            raise HTTPException(status_code=400, detail="Missing 'image' file in multipart upload")
+        # Retrieve file list: support 'images' list or fallback to single 'image'
+        files = form.getlist("images")
+        if not files:
+            single = form.get("image")
+            if single:
+                files = [single]
 
-        if hasattr(file_obj, "content_type") and file_obj.content_type:
-            mime = file_obj.content_type.lower()
-            if mime not in ALLOWED_MIME_TYPES and mime not in {"application/octet-stream", "image/jpg"}:
-                raise HTTPException(status_code=400, detail=f"Unsupported MIME type: {mime}. Allowed: image/jpeg, image/png, image/webp")
+        if not files:
+            raise HTTPException(status_code=400, detail="Missing 'image' or 'images' in multipart upload")
 
-        image_bytes = await file_obj.read()
-        if len(image_bytes) == 0:
-            raise HTTPException(status_code=400, detail="Uploaded image file is empty")
+        if len(files) > 3:
+            raise HTTPException(status_code=400, detail="Maximum 3 specimen photos allowed per observation")
 
-        if len(image_bytes) > MAX_IMAGE_BYTES:
-            raise HTTPException(status_code=400, detail="Image exceeds 15MB size limit")
+        images_bytes = []
+        for file_obj in files:
+            if not hasattr(file_obj, "read"):
+                continue
+            if hasattr(file_obj, "content_type") and file_obj.content_type:
+                mime = file_obj.content_type.lower()
+                if mime not in ALLOWED_MIME_TYPES and mime not in {"application/octet-stream", "image/jpg"}:
+                    raise HTTPException(status_code=400, detail=f"Unsupported MIME type: {mime}. Allowed: image/jpeg, image/png, image/webp")
 
-        # Validate image integrity and format in memory
-        try:
-            with Image.open(io.BytesIO(image_bytes)) as img:
-                fmt = img.format.upper() if img.format else ""
-                if fmt not in {"JPEG", "PNG", "WEBP"}:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Unsupported image format: {fmt or 'unknown'}. Allowed formats: image/jpeg, image/png, image/webp"
-                    )
-                img.verify()
-        except HTTPException:
-            raise
-        except Exception:
-            raise HTTPException(status_code=400, detail="Invalid or malformed image format")
+            b = await file_obj.read()
+            if len(b) == 0:
+                raise HTTPException(status_code=400, detail="Uploaded image file is empty")
+            if len(b) > MAX_IMAGE_BYTES:
+                raise HTTPException(status_code=400, detail="Image exceeds 15MB size limit")
 
-        result = await recognizer.recognize_bytes(image_bytes)
+            try:
+                with Image.open(io.BytesIO(b)) as img:
+                    fmt = img.format.upper() if img.format else ""
+                    if fmt not in {"JPEG", "PNG", "WEBP"}:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Unsupported image format: {fmt or 'unknown'}. Allowed formats: image/jpeg, image/png, image/webp"
+                        )
+                    img.verify()
+            except HTTPException:
+                raise
+            except Exception:
+                raise HTTPException(status_code=400, detail="Invalid or malformed image format")
+
+            images_bytes.append(b)
+
+        result = await recognizer.recognize_multi_bytes(images_bytes, organ_type=str(organ_type))
         return RecognizeResponse(**result)
 
     # 2. Handle JSON payload
@@ -295,38 +340,54 @@ async def recognize_object(request: Request):
 
     preset_id = body.get("preset_id")
     image_base64 = body.get("image_base64")
+    images_base64 = body.get("images_base64")
+    organ_type = body.get("organ_type") or "whole_plant"
 
-    if not preset_id and not image_base64:
-        raise HTTPException(status_code=400, detail="Provide either 'preset_id' or 'image_base64'")
+    if not preset_id and not image_base64 and not images_base64:
+        raise HTTPException(status_code=400, detail="Provide either 'preset_id', 'image_base64', or 'images_base64'")
 
     if preset_id:
-        result = await recognizer.recognize(preset_id=str(preset_id))
+        result = await recognizer.recognize(preset_id=str(preset_id), organ_type=str(organ_type))
         return RecognizeResponse(**result)
 
-    # Decode and validate image_base64
-    try:
-        import base64
-        import re
-        raw_b64 = re.sub(r"^data:image/[a-zA-Z0-9\+\-\.]+;base64,", "", str(image_base64).strip())
-        b64_bytes = base64.b64decode(raw_b64)
-        if len(b64_bytes) == 0:
-            raise HTTPException(status_code=400, detail="Provided image data is empty")
-        if len(b64_bytes) > MAX_IMAGE_BYTES:
-            raise HTTPException(status_code=400, detail="Image exceeds 15MB size limit")
-        with Image.open(io.BytesIO(b64_bytes)) as img:
-            fmt = img.format.upper() if img.format else ""
-            if fmt not in {"JPEG", "PNG", "WEBP"}:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Unsupported image format: {fmt or 'unknown'}. Allowed formats: JPEG, PNG, WebP"
-                )
-            img.verify()
-        result = await recognizer.recognize_bytes(b64_bytes)
-        return RecognizeResponse(**result)
-    except HTTPException:
-        raise
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid or malformed base64 image data")
+    # Collect list of base64 inputs (up to 3)
+    raw_list = []
+    if images_base64 and isinstance(images_base64, list):
+        raw_list = images_base64
+    elif image_base64:
+        raw_list = [image_base64]
+
+    if len(raw_list) > 3:
+        raise HTTPException(status_code=400, detail="Maximum 3 specimen photos allowed per observation")
+
+    import base64
+    import re
+    decoded_bytes = []
+    for raw_item in raw_list:
+        try:
+            raw_b64 = re.sub(r"^data:image/[a-zA-Z0-9\+\-\.]+;base64,", "", str(raw_item).strip())
+            b64_bytes = base64.b64decode(raw_b64)
+            if len(b64_bytes) == 0:
+                raise HTTPException(status_code=400, detail="Provided image data is empty")
+            if len(b64_bytes) > MAX_IMAGE_BYTES:
+                raise HTTPException(status_code=400, detail="Image exceeds 15MB size limit")
+            with Image.open(io.BytesIO(b64_bytes)) as img:
+                fmt = img.format.upper() if img.format else ""
+                if fmt not in {"JPEG", "PNG", "WEBP"}:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Unsupported image format: {fmt or 'unknown'}. Allowed formats: JPEG, PNG, WebP"
+                    )
+                img.verify()
+            decoded_bytes.append(b64_bytes)
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid or malformed base64 image data")
+
+    result = await recognizer.recognize_multi_bytes(decoded_bytes, organ_type=str(organ_type))
+    return RecognizeResponse(**result)
+
 
 @router.post("/mission", response_model=MissionResponse)
 async def generate_mission(req: MissionRequest, db: Session = Depends(get_db)):
@@ -628,3 +689,63 @@ async def get_journal(limit: int = 50, db: Session = Depends(get_db)):
 async def get_exploration_stats(db: Session = Depends(get_db)):
     """Return lifetime field stats."""
     return JournalService.get_stats(db=db)
+
+
+# --- Botanical Encyclopedia & Plant Database Endpoints ---
+
+@router.get("/plants/categories")
+async def get_plant_categories(db: Session = Depends(get_db)):
+    """Return all available plant categories and their species counts."""
+    return PlantService.get_categories(db=db)
+
+
+@router.get("/plants/search")
+async def search_plants(
+    q: str = Query(..., description="Search query across scientific, common, Hindi, Bengali names, or traits"),
+    category: Optional[str] = Query(None, description="Optional category filter"),
+    limit: int = Query(50, ge=1, le=150, description="Max results"),
+    db: Session = Depends(get_db)
+):
+    """Search botanical database across multiple indices (canonical, common, Hindi, Bengali, traits)."""
+    return PlantService.search_plants(db=db, query_str=q, category=category, limit=limit)
+
+
+@router.get("/plants/match/{name}")
+async def match_plant_by_name(
+    name: str,
+    db: Session = Depends(get_db)
+):
+    """Look up a botanical profile by scientific or common name."""
+    plant = PlantService.get_plant_by_scientific_name(db=db, name=name)
+    if not plant:
+        # Try search fallback
+        results = PlantService.search_plants(db=db, query_str=name, limit=1)
+        if results:
+            return results[0]
+        raise HTTPException(status_code=404, detail=f"No botanical profile found matching '{name}'")
+    return plant
+
+
+@router.get("/plants/{plant_id}")
+async def get_plant_detail(
+    plant_id: str,
+    db: Session = Depends(get_db)
+):
+    """Fetch complete botanical profile for a specific plant species by ID."""
+    plant = PlantService.get_plant_by_id(db=db, plant_id=plant_id)
+    if not plant:
+        raise HTTPException(status_code=404, detail=f"Plant species '{plant_id}' not found in encyclopedia")
+    return plant
+
+
+@router.get("/plants")
+async def list_plants(
+    category: Optional[str] = Query(None, description="Filter by category (medicinal, flower, tree, fruit, etc.)"),
+    growth_type: Optional[str] = Query(None, description="Filter by growth type (herb, shrub, tree, climber, etc.)"),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(120, ge=1, le=200),
+    db: Session = Depends(get_db)
+):
+    """List plant species in the encyclopedia with optional filtering."""
+    return PlantService.list_plants(db=db, category=category, growth_type=growth_type, skip=skip, limit=limit)
+

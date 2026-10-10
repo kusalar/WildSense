@@ -1,0 +1,605 @@
+{
+  "benchmark_name": "WildSense Stage 6 Final Arbitration Benchmark",
+  "timestamp": "2026-10-10",
+  "dev_thresholds": {
+    "Ocimum tenuiflorum": 0.68,
+    "Tagetes erecta": 0.72,
+    "Azadirachta indica": 0.71,
+    "Nyctanthes arbor-tristis": 0.7,
+    "Butea monosperma": 0.68,
+    "Moringa oleifera": 0.68,
+    "Rosa chinensis": 0.7
+  },
+  "summary": {
+    "held_out_count": 28,
+    "global_exact_count": 3,
+    "global_exact_accuracy": 0.1071,
+    "global_genus_count": 5,
+    "global_genus_accuracy": 0.1786,
+    "specialist_unconstrained_count": 25,
+    "specialist_unconstrained_accuracy": 0.8929,
+    "arbitrated_accepted_count": 13,
+    "arbitrated_coverage": 0.4643,
+    "arbitrated_abstained_count": 15,
+    "arbitrated_abstention_rate": 0.5357,
+    "arbitrated_exact_count": 13,
+    "accuracy_among_accepted": 1.0
+  },
+  "baseline_specimens": [
+    {
+      "specimen": "neem",
+      "global_top1": "Bursera simaruba",
+      "global_score": 0.613,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.825,
+      "arbitrated_result": "Azadirachta indica",
+      "chosen_source": "specialist",
+      "warnings": []
+    },
+    {
+      "specimen": "tulsi",
+      "global_top1": "Olearia paniculata",
+      "global_score": 0.548,
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.724,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "specimen": "marigold",
+      "global_top1": "Euphorbia cyparissias",
+      "global_score": 0.57,
+      "specialist_top1": "Tagetes erecta",
+      "specialist_score": 0.725,
+      "arbitrated_result": "Euphorbia cyparissias",
+      "chosen_source": "global",
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "specimen": "rose",
+      "global_top1": "Rosa nutkana",
+      "global_score": 0.664,
+      "specialist_top1": "Rosa chinensis",
+      "specialist_score": 0.693,
+      "arbitrated_result": "Rosa nutkana",
+      "chosen_source": "global",
+      "warnings": []
+    },
+    {
+      "specimen": "lotus",
+      "global_top1": "Nelumbo nucifera",
+      "global_score": 0.67,
+      "specialist_top1": "Butea monosperma",
+      "specialist_score": 0.616,
+      "arbitrated_result": "Nelumbo nucifera",
+      "chosen_source": "global",
+      "warnings": []
+    },
+    {
+      "specimen": "hibiscus",
+      "global_top1": "Hibiscus rosa-sinensis",
+      "global_score": 0.649,
+      "specialist_top1": "Rosa chinensis",
+      "specialist_score": 0.796,
+      "arbitrated_result": "Hibiscus rosa-sinensis",
+      "chosen_source": "global",
+      "warnings": []
+    },
+    {
+      "specimen": "water_lily",
+      "global_top1": "Nymphaea nouchali",
+      "global_score": 0.691,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.582,
+      "arbitrated_result": "Nymphaea nouchali",
+      "chosen_source": "global",
+      "warnings": []
+    },
+    {
+      "specimen": "non_plant_rock",
+      "global_top1": "Taxodium distichum",
+      "global_score": 0.628,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.706,
+      "arbitrated_result": "Optical Rejection",
+      "chosen_source": "rejected",
+      "warnings": [
+        "Zero vegetation variance; stone texture.",
+        "Rejected due to physical unreadability."
+      ]
+    }
+  ],
+  "held_out_predictions": [
+    {
+      "observation_id": 212858311,
+      "true_species": "Ocimum tenuiflorum",
+      "global_top1": "Origanum vulgare",
+      "global_score": 0.577,
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.774,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 283823922,
+      "true_species": "Ocimum tenuiflorum",
+      "global_top1": "Spiraea tomentosa",
+      "global_score": 0.546,
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.763,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 351651565,
+      "true_species": "Ocimum tenuiflorum",
+      "global_top1": "Whipplea modesta",
+      "global_score": 0.555,
+      "specialist_top1": "Nyctanthes arbor-tristis",
+      "specialist_score": 0.584,
+      "arbitrated_result": "Whipplea modesta",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 355034865,
+      "true_species": "Ocimum tenuiflorum",
+      "global_top1": "Rivina humilis",
+      "global_score": 0.569,
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.802,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 8533306,
+      "true_species": "Tagetes erecta",
+      "global_top1": "Tagetes lunulata",
+      "global_score": 0.674,
+      "specialist_top1": "Tagetes erecta",
+      "specialist_score": 0.896,
+      "arbitrated_result": "Tagetes erecta",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 7503575,
+      "true_species": "Tagetes erecta",
+      "global_top1": "Cosmos sulphureus",
+      "global_score": 0.604,
+      "specialist_top1": "Tagetes erecta",
+      "specialist_score": 0.843,
+      "arbitrated_result": "Tagetes erecta",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 9125846,
+      "true_species": "Tagetes erecta",
+      "global_top1": "Tetraneuris scaposa",
+      "global_score": 0.7,
+      "specialist_top1": "Tagetes erecta",
+      "specialist_score": 0.799,
+      "arbitrated_result": "Tetraneuris scaposa",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": []
+    },
+    {
+      "observation_id": 248965072,
+      "true_species": "Tagetes erecta",
+      "global_top1": "Eschscholzia californica",
+      "global_score": 0.536,
+      "specialist_top1": "Tagetes erecta",
+      "specialist_score": 0.776,
+      "arbitrated_result": "Tagetes erecta",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 30043906,
+      "true_species": "Azadirachta indica",
+      "global_top1": "Azadirachta indica",
+      "global_score": 0.653,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.813,
+      "arbitrated_result": "Azadirachta indica",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 181095975,
+      "true_species": "Azadirachta indica",
+      "global_top1": "Azadirachta indica",
+      "global_score": 0.537,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.736,
+      "arbitrated_result": "Azadirachta indica",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": true,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 114153293,
+      "true_species": "Azadirachta indica",
+      "global_top1": "Quercus suber",
+      "global_score": 0.608,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.705,
+      "arbitrated_result": "Quercus suber",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": []
+    },
+    {
+      "observation_id": 255924073,
+      "true_species": "Azadirachta indica",
+      "global_top1": "Azadirachta indica",
+      "global_score": 0.625,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.796,
+      "arbitrated_result": "Azadirachta indica",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 330727285,
+      "true_species": "Nyctanthes arbor-tristis",
+      "global_top1": "Vincetoxicum nigrum",
+      "global_score": 0.552,
+      "specialist_top1": "Nyctanthes arbor-tristis",
+      "specialist_score": 0.714,
+      "arbitrated_result": "Vincetoxicum nigrum",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 331907265,
+      "true_species": "Nyctanthes arbor-tristis",
+      "global_top1": "Sideroxylon lanuginosum",
+      "global_score": 0.565,
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.76,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": false,
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 331907317,
+      "true_species": "Nyctanthes arbor-tristis",
+      "global_top1": "Zephyranthes chlorosolen",
+      "global_score": 0.585,
+      "specialist_top1": "Nyctanthes arbor-tristis",
+      "specialist_score": 0.786,
+      "arbitrated_result": "Nyctanthes arbor-tristis",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 334306911,
+      "true_species": "Nyctanthes arbor-tristis",
+      "global_top1": "Araujia sericifera",
+      "global_score": 0.556,
+      "specialist_top1": "Nyctanthes arbor-tristis",
+      "specialist_score": 0.799,
+      "arbitrated_result": "Nyctanthes arbor-tristis",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 262253454,
+      "true_species": "Butea monosperma",
+      "global_top1": "Quercus kelloggii",
+      "global_score": 0.537,
+      "specialist_top1": "Butea monosperma",
+      "specialist_score": 0.669,
+      "arbitrated_result": "Quercus kelloggii",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 186949540,
+      "true_species": "Butea monosperma",
+      "global_top1": "Cercis occidentalis",
+      "global_score": 0.606,
+      "specialist_top1": "Butea monosperma",
+      "specialist_score": 0.77,
+      "arbitrated_result": "Cercis occidentalis",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": []
+    },
+    {
+      "observation_id": 66421309,
+      "true_species": "Butea monosperma",
+      "global_top1": "Spathodea campanulata",
+      "global_score": 0.582,
+      "specialist_top1": "Butea monosperma",
+      "specialist_score": 0.865,
+      "arbitrated_result": "Butea monosperma",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 263727473,
+      "true_species": "Butea monosperma",
+      "global_top1": "Berberis thunbergii",
+      "global_score": 0.558,
+      "specialist_top1": "Butea monosperma",
+      "specialist_score": 0.64,
+      "arbitrated_result": "Berberis thunbergii",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 70719011,
+      "true_species": "Moringa oleifera",
+      "global_top1": "Erythrostemon mexicanus",
+      "global_score": 0.608,
+      "specialist_top1": "Moringa oleifera",
+      "specialist_score": 0.774,
+      "arbitrated_result": "Erythrostemon mexicanus",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": []
+    },
+    {
+      "observation_id": 133075170,
+      "true_species": "Moringa oleifera",
+      "global_top1": "Erythrostemon mexicanus",
+      "global_score": 0.577,
+      "specialist_top1": "Moringa oleifera",
+      "specialist_score": 0.74,
+      "arbitrated_result": "Erythrostemon mexicanus",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 189442979,
+      "true_species": "Moringa oleifera",
+      "global_top1": "Robinia pseudoacacia",
+      "global_score": 0.585,
+      "specialist_top1": "Moringa oleifera",
+      "specialist_score": 0.756,
+      "arbitrated_result": "Robinia pseudoacacia",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 118910394,
+      "true_species": "Moringa oleifera",
+      "global_top1": "Bursera simaruba",
+      "global_score": 0.59,
+      "specialist_top1": "Azadirachta indica",
+      "specialist_score": 0.758,
+      "arbitrated_result": "Bursera simaruba",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 403595599,
+      "true_species": "Rosa chinensis",
+      "global_top1": "Clematis texensis",
+      "global_score": 0.603,
+      "specialist_top1": "Rosa chinensis",
+      "specialist_score": 0.696,
+      "arbitrated_result": "Clematis texensis",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": []
+    },
+    {
+      "observation_id": 394475572,
+      "true_species": "Rosa chinensis",
+      "global_top1": "Robinia neomexicana",
+      "global_score": 0.604,
+      "specialist_top1": "Rosa chinensis",
+      "specialist_score": 0.758,
+      "arbitrated_result": "Robinia neomexicana",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": []
+    },
+    {
+      "observation_id": 398568087,
+      "true_species": "Rosa chinensis",
+      "global_top1": "Impatiens glandulifera",
+      "global_score": 0.633,
+      "specialist_top1": "Rosa chinensis",
+      "specialist_score": 0.817,
+      "arbitrated_result": "Rosa chinensis",
+      "chosen_source": "specialist",
+      "specialist_accepted": true,
+      "correct": true,
+      "warnings": []
+    },
+    {
+      "observation_id": 381623973,
+      "true_species": "Rosa chinensis",
+      "global_top1": "Rosa rugosa",
+      "global_score": 0.62,
+      "specialist_top1": "Rosa chinensis",
+      "specialist_score": 0.704,
+      "arbitrated_result": "Rosa rugosa",
+      "chosen_source": "global",
+      "specialist_accepted": false,
+      "correct": false,
+      "warnings": []
+    }
+  ],
+  "control_predictions": [
+    {
+      "observation_id": 399156421,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.82,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "match_level": "genus_confirmed",
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 321813332,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Nyctanthes arbor-tristis",
+      "specialist_score": 0.675,
+      "arbitrated_result": "Celtis reticulata",
+      "chosen_source": "global",
+      "match_level": "uncertain",
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 190913544,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.703,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "match_level": "genus_confirmed",
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 52416653,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.778,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "match_level": "genus_confirmed",
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 36688217,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.738,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "match_level": "genus_confirmed",
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 144416895,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.705,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "match_level": "genus_confirmed",
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    },
+    {
+      "observation_id": 150873209,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.751,
+      "arbitrated_result": "Vitex agnus-castus",
+      "chosen_source": "global",
+      "match_level": "uncertain",
+      "warnings": [
+        "Low confidence match; specimen uncatalogued or outside known flora."
+      ]
+    },
+    {
+      "observation_id": 296621315,
+      "true_species": "Ocimum basilicum",
+      "specialist_top1": "Ocimum tenuiflorum",
+      "specialist_score": 0.753,
+      "arbitrated_result": "Ocimum tenuiflorum",
+      "chosen_source": "specialist",
+      "match_level": "genus_confirmed",
+      "warnings": [
+        "Genus-level confirmation (Ocimum sp. / Holy Basil group). Vegetative similarity with Sweet Basil (Ocimum basilicum) requires floral/calyx inspection."
+      ]
+    }
+  ]
+}

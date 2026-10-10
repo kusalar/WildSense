@@ -195,8 +195,9 @@ def test_recognizer_bytes_fallback():
     assert 0.0 <= result["confidence"] <= 1.0
     assert "common_name" in result
     assert "uncertainty" in result
-    assert "inference_ms" in result
-    assert result["provider"] in {"ollama_vision", "local_cv_fallback", "fallback"}
+    assert result["inference_ms"] >= 0
+    assert result["provider"] in {"onnx_bioclip_botany", "ollama_vision", "local_cv_fallback", "fallback"}
+
 
 
 # ==========================================
@@ -271,9 +272,10 @@ def test_api_fallback_behavior():
     res = client.post("/api/recognize", files=files)
     assert res.status_code == 200
     data = res.json()
-    # Must succeed and indicate local fallback or vision
-    assert data["provider"] in {"local_cv_fallback", "ollama_vision", "fallback"}
-    assert "approximate" in data["uncertainty"].lower()
+    # Must succeed and indicate local provider (ONNX, local CV fallback, or Ollama)
+    assert data["provider"] in {"onnx_bioclip_botany", "local_cv_fallback", "ollama_vision", "fallback"}
+    assert len(data["uncertainty"]) > 0
+
 
 
 # ==========================================

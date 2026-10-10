@@ -16,6 +16,7 @@ __pycache__/
 htmlcov/
 
 # Local databases and data
+*.db
 data/*.db
 data/wildsense.db
 

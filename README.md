@@ -1,397 +1,261 @@
 # WildSense 🌿
 > **Look closer. Then look away.**  
-> *Offline-First AI Nature Exploration Companion for the "Touch Grass" Challenge.*
+> *Offline-First Local AI Nature Exploration Companion for the "Touch Grass" Challenge.*
 
 ---
 
-## 🎯 The Core Philosophy
+## 🎯 The Core Philosophy & The Problem
 
-WildSense is not a generic chatbot, an endless social feed, or another app designed to steal your attention.
+Modern smartphones and algorithmic feeds have detached people from the living physical world. Even nature identification apps frequently trap users in their screens—demanding endless scrolling, social feeds, gamified streaks, and cloud uploads.
 
-**The goal of WildSense is to minimize screen time and maximize real-world physical engagement with nature.**
+**WildSense does the exact opposite.**
+- **The Core Goal**: Minimize screen time and maximize real-world physical engagement with nature.
+- **Anti-Gamification**: No streaks, no social leaderboards, no push notifications, no attention-seeking dark patterns.
+- **The Touch Grass Mantra**: WildSense is a bridge to the outdoors. The app succeeds when you put your phone in your pocket.
 
 ```text
-📷 REAL WORLD
-      ↓
-LOCAL VISION
-"What is this?"
-      ↓
-🧠 GEMMA / QWEN
-"What should I try?"
-      ↓
-📵 PHONE AWAY
-      ↓
-🌿 EXPLORE
-      ↓
-REFLECT
-      ↓
-🌎 GRASS SCORE
+       📷 REAL WORLD
+             ↓
+    LOCAL BOTANICAL AI
+      "What is this?"
+             ↓
+     PHYSICAL MISSION
+  "What can I investigate?"
+             ↓
+      📵 PHONE IN POCKET
+             ↓
+     🌿 REAL SENSORY TIME
+             ↓
+         REFLECT
+             ↓
+     🌎 EXPLAINABLE SCORE
 ```
 
 > **"WildSense succeeds when you stop using WildSense."**
 
-WildSense does not need a remote AI service to decide what someone should do outdoors.
+---
 
-The reasoning model runs locally.
+## ✨ Main Features
 
-The user's image can stay local.
-
-The mission can be generated locally.
-
-The experience can continue without sending personal observations to a cloud AI provider.
+1. **Local FastViT Botanical Identification (4,271 Taxa)**:
+   - Evaluates specimens completely offline on local CPU using a distilled FastViT image encoder (`flora_student_fp32.onnx`) and a 4,271-class botanical embedding space (`taxa_table.npy`).
+   - Generates top-5 candidate rankings with scientific names, common names, regional vernacular names (Hindi, Bengali, Tamil), and calibrated similarity metrics.
+2. **Multi-Photo & Organ-Type Guidance**:
+   - Accepts up to 3 photographs of a specimen with botanical organ selection (**Leaf**, **Flower**, **Fruit**, **Bark**, **Whole Plant**).
+   - Fuses multi-view feature vectors into an L2-normalized mean embedding for higher diagnostic stability.
+3. **Deterministic Image Quality Safeguards**:
+   - Pre-flight optical checks inspect image resolution, under/overexposure, and pixel variance to warn against blurry or blank inputs.
+4. **Offline Botanical Encyclopedia (114 Native Species)**:
+   - Built-in SQLite database of regional trees, medicinal herbs, shrubs, and wildflowers.
+   - Provides diagnostic traits, ecological roles, and traditional uses with full search and category filtering.
+5. **Contextual Physical Missions**:
+   - Generates 2–3 minute sensory exploration missions adhering strictly to the **10 Nature Mission Safety Rules** (no damaging plants, no touching hazardous species, sensory curiosity over screen consumption).
+6. **Phone-Free Field Mode & Spoken Narration**:
+   - Minimalist screen-off field timer.
+   - Hands-free audio mission narration powered either by **100% offline Browser Web Speech API** or high-fidelity **ElevenLabs Flash v2.5**.
+7. **Explainable Grass Score**:
+   - Transparent 0–100 score measuring how effectively the user traded screen time for outdoor exploration.
+   - 70% World/Screen Ratio + 15% Mission Completion + 10% Phone-Free Field Time + 5% Sensory Reflection.
+8. **Private SQLite Field Journal**:
+   - Stores exploration logs, reflections, and discovery milestones locally on disk. Zero cloud database requirements.
+9. **Regional Indian Flora Specialist (Dual-Model Arbitration)**:
+   - High-precision classifier (`indian_flora_specialist.npz`) targeting regional flora: **Neem**, **Tulsi**, **Marigold**, **Shiuli**, **Palash**, **Moringa**, and **Rose**.
+   - Governed by a strict 5-gate safety arbitrator (`ENABLE_INDIAN_FLORA_SPECIALIST=false` by default for maximum release stability).
 
 ---
 
-## 🌎 Grass Score: An Explainable, Evidence-Based Metric
+## 🏛️ High-Level Architecture Overview
 
-**Grass Score is not an engagement score.** It does not reward screen time, app opens, or habitual usage. Instead, it measures whether WildSense successfully helped someone **trade screen time for real-world physical exploration**.
-
-### 1. Philosophy & Anti-Gamification
-- **Rewards**: LESS SCREEN + MORE WORLD + ACTUAL ACTION + REFLECTION.
-- **Strictly Avoids Dark Patterns**:
-  - ❌ No streaks requiring daily app usage
-  - ❌ No addictive push notifications
-  - ❌ No infinite feeds or algorithmic scrolling
-  - ❌ No competitive leaderboards or social comparison
-  - ❌ No engagement badges encouraging app screen time
-- **Guiding Principle**: Grass Score is an honest reflection metric, not an engagement trap. WildSense succeeds when the user puts the phone away.
-
-### 2. Weighted Formula (Bounded: 0 to 100 Points)
-
-The score is calculated deterministically across four independent, measurable behaviors:
+WildSense is structured into three clean, loosely-coupled layers:
 
 ```text
-GRASS SCORE = 
-  70%  World / Screen Ratio      (0 to 70 pts)
-  15%  Mission Completion         (0 or 15 pts)
-  10%  Phone-Free Field Time      (0 to 10 pts)
-   5%  Reflection                 (0 to 5 pts)
-─────────────────────────────────────────────────
-Total: 100 points maximum (clamped between 0 and 100)
+┌──────────────────────────────────────────────────────────────────┐
+│                   NEXT.JS 16 FRONTEND (PORT 3000)                │
+│  • Mobile-first responsive UI (React 19, TypeScript, Tailwind)   │
+│  • Camera capture (1-3 photos) with Organ Selector               │
+│  • Field Mode timer, Speech synthesis, Offline Encyclopedia      │
+└─────────────────────────────────┬────────────────────────────────┘
+                                  │ HTTP / JSON & Multipart
+┌─────────────────────────────────▼────────────────────────────────┐
+│                   FASTAPI BACKEND (PORT 8000)                    │
+│  • Deterministic Image Quality Pre-Flight Checks                 │
+│  • FastViT ONNX Runtime Inference (512-dim embedding extraction) │
+│  • Cosine Similarity vs 4,271 Taxonomy Centroids                 │
+│  • Optional 5-Gate Specialist Arbitrator (Feature-Flagged)       │
+│  • Contextual Mission Engine & Grass Score Calculator            │
+│  • SQLite Local Database & Journal Service                       │
+└─────────────────────────────────┬────────────────────────────────┘
+                                  │
+┌─────────────────────────────────▼────────────────────────────────┐
+│                     LOCAL STORAGE & ASSETS                       │
+│  • backend/models_onnx/flora_student_fp32.onnx (44.8 MB)         │
+│  • backend/models_onnx/taxa_table.npy (4,271 classes, 16.7 MB)   │
+│  • backend/models_onnx/taxa_labels.json (301 KB)                 │
+│  • data/specialist_dataset/indian_flora_specialist.npz (28 KB)   │
+│  • data/wildsense.db (SQLite database: 114 plants, sessions)     │
+└──────────────────────────────────────────────────────────────────┘
 ```
-
-#### Component 1: World / Screen Ratio (70%)
-- **Formula**: `ratio = world_time_seconds / max(screen_time_seconds, 1)`
-- **Piecewise Interpolation** prevents extreme ratios from arbitrarily outputting 100:
-  - `< 1×` → 10 base points
-  - `1×` → 25 base points (`17.5` weighted pts)
-  - `3×` → 55 base points (`38.5` weighted pts)
-  - `5×` → 70 base points (`49.0` weighted pts)
-  - `10×` → 90 base points (`63.0` weighted pts)
-  - `20× or higher` → 100 base points (`70.0` max weighted pts)
-- **Component Contribution**: `ratio_score = mapped_ratio_points * 0.70` (max 70).
-
-#### Component 2: Mission Completion (15%)
-- **Award**: `15 points` if the field session is finished and completed; `0 points` if abandoned.
-- Points are never awarded merely for generating a mission.
-
-#### Component 3: Phone-Free Field Time (10%)
-- **Bounded Scale** rewarding meaningful time outdoors without screen intervention:
-  - `0s` → 0 pts
-  - `30s` → 3 pts
-  - `60s` → 5 pts
-  - `120s` → 7 pts
-  - `300s` → 8.5 pts
-  - `600s+` → 10 pts (capped at 10 max)
-
-#### Component 4: Reflection (5%)
-- **Tiers**:
-  - Empty / none → 0 pts
-  - Very short (<15 chars) → 2 pts
-  - Meaningful physical observation → 4 pts
-  - Meaningful observation + curiosity / question (`?`, `why`, `how`, `wonder`) → 5 pts
-
-### 3. Example E2E Case (6.87× Ratio)
-```text
-World Time: 261s (04:21)
-Screen Time: 38s (00:38)
-World / Screen Ratio: 6.87×
-Mission: Completed
-Phone-Free Time: 261s
-Reflection: Meaningful observation ("underside had lighter green with prominent raised veins")
-
-SCORE BREAKDOWN:
-🌿 World / Screen Ratio: 55 / 70
-✓ Mission Completed:     15 / 15
-📵 Phone-Free Time:       8 / 10
-💭 Reflection:            4 / 5
-───────────────────────────────
-TOTAL:                   82 / 100 (True Field Naturalist 🌿)
-```
-Notice that a 6.9× ratio does **not** arbitrarily produce 100; it produces a realistic, explainable **82 / 100**.
 
 ---
 
-## 🔬 Model Separation & Architecture
+## 💻 Technology Stack & AI Models
 
-WildSense strictly separates the vision classification pipeline from the reasoning and mission generation pipeline:
+| Component | Technology | Role & Deployment |
+| :--- | :--- | :--- |
+| **Frontend** | Next.js 16.4 (React 19, TypeScript, Tailwind CSS) | Mobile-first field UI, PWA-ready, runs on port 3000 |
+| **Backend** | Python 3.11+, FastAPI, Uvicorn | Asynchronous REST API, runs on port 8000 |
+| **Vision AI Engine** | FastViT ONNX Runtime (`flora_student_fp32.onnx`) | Distilled botanical vision model, 512-dim L2 embeddings |
+| **Global Taxonomy** | NumPy Array (`taxa_table.npy`) | 4,271 global botanical taxon vectors |
+| **Indian Flora Specialist** | NumPy Centroids + Logistic Regression | 7 regional target species (`indian_flora_specialist.npz`) |
+| **Text Reasoning (Optional)** | Ollama (`qwen3:4b` / `gemma2:2b`) or Heuristic Mock | Mission generation and botanical reflection |
+| **Audio Engine** | Web Speech API (offline) or ElevenLabs API | Spoken mission instructions for eyes-free exploration |
+| **Database** | SQLite + SQLAlchemy (`wildsense.db`) | 114 botanical profiles, user exploration journal |
 
-```
-Camera Image / Photo
-         ↓
-VisionProvider (OllamaVisionProvider / MockVisionProvider)
-         ↓
-Structured Recognition (Category, Name, Confidence, Epistemic Uncertainty)
-         ↓
-AIProvider / LLM (OllamaProvider with Qwen3:4b or Gemma3:4b)
-         ↓
-MissionGenerator (Phone-Free Physical Observation Mission)
-         ↓
-Phone-Free Field Mode (Timer running, phone in pocket)
-         ↓
-Observation & Reflection
-         ↓
-Grass Score (SQLite Journal)
-```
-
-### 1. Vision Model: "What is this?"
-- **Role**: Identifies the biological kingdom or morphological category (leaf, flower, tree, rock, insect, etc.), estimates approximate common name, evaluates confidence, and produces epistemic uncertainty notes.
-- **Configured Vision Model**: `moondream` (Ollama, ~829 MB, 1.4B parameters).
-- **Vision Provider Abstraction**:
-  - `OllamaVisionProvider`: Communicates with local Ollama daemon using in-memory base64 encoded images. Zero cloud calls.
-  - `MockVisionProvider`: Genuine local in-memory computer vision using PIL spectral and chromatic band heuristics. Analyzes chlorophyll green ratios, floral pigment peaks, and mineral textures in ~5–15 ms without any model downloads.
-
-### 2. Reasoning LLM: "What should I try?"
-- **Role**: Takes the structured recognition output and synthesizes a safe, phone-free physical investigation mission and post-walk reflection.
-- **Configured Model**: `qwen3:4b` (Ollama open-weight model, ~2.5 GB, 4.0B parameters).
-- **Crucial Distinction**: `Qwen3:4b` is an open-weight text reasoning model, **NOT** a computer vision model. It answers "What should the observer investigate with their own senses?", not "What does the image contain?".
+> **IMPORTANT CLARIFICATION**:  
+> **Ollama is NOT required for botanical plant recognition.**  
+> Plant identification runs 100% offline via local ONNX Runtime and NumPy embedding dot products. Ollama is only used as an optional text-generation backend for exploration missions; if Ollama is not installed or running, WildSense automatically uses its built-in rule-based mission engine without degradation.
 
 ---
 
-## 💻 Hardware Considerations & Performance
+## 🚀 Windows Setup Guide
 
-Tested on a real-world everyday developer laptop:
-- **Operating System**: Windows 10
-- **CPU**: 11th Gen Intel Core i3-1115G4 (2 physical cores, 4 threads @ 3.00 GHz)
-- **RAM**: 12 GB Total (~4.5 GB available physical memory)
-- **GPU**: Intel UHD integrated graphics (CPU-only inference mode)
-- **Storage**: SSD (118 GB available)
+### 1. Prerequisites
+- **Python 3.11+** installed (check with `python --version`)
+- **Node.js 18+** & **npm** installed (check with `node --version`)
+- **Windows PowerShell** or Windows Terminal
+- *(Optional)* [Ollama](https://ollama.ai) if you wish to run local LLMs for mission text.
 
-### Performance & Latency Metrics
-- **Local CV In-Memory Heuristic Inference**: ~5–15 ms
-- **Local Ollama Text LLM (`qwen3:4b`) Generation**: ~1.5s–15s on CPU (~7–10 tokens/second)
-- **Total Pipeline Latency**: ~1.5s–16s from camera capture to structured mission preview
-- **RAM Footprint**: `qwen3:4b` consumes ~2.6 GB RAM during inference. Running on a 12 GB RAM laptop leaves ample headroom for OS and background tasks without disk thrashing.
+### 2. Clone and Configure Environment
+From your terminal:
+```powershell
+# Navigate to project directory
+cd C:\wildsense
+
+# Copy environment template
+Copy-Item .env.example .env
+```
+
+### 3. Backend Setup
+```powershell
+# Recommended: Create and activate a Python virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Install backend dependencies
+pip install -r requirements.txt
+```
+
+Verify that the required ONNX assets exist in `backend/models_onnx/`:
+- `flora_student_fp32.onnx` (~44.8 MB)
+- `taxa_table.npy` (~16.7 MB)
+- `taxa_labels.json` (~301 KB)
+
+*(These are included directly in the repository).*
+
+### 4. Frontend Setup
+In the `frontend` directory:
+```powershell
+cd frontend
+npm install
+cd ..
+```
 
 ---
 
-## 🛡️ Epistemic Honesty & Fallback Chain
+## 🏃 Running the Application
 
-WildSense adheres to strict epistemic modesty:
-1. **Never Claim False Certainty**: Instead of "THIS IS DEFINITELY NEEM", WildSense reports: *"Likely Neem Leaf — 74% confidence. Visual identification is approximate."*
-2. **3-Tier Resilient Fallback Chain**:
+Open **two separate PowerShell terminals**:
+
+### Terminal 1 — Backend API
+```powershell
+cd C:\wildsense
+# Activate venv if created: .\.venv\Scripts\Activate.ps1
+python backend/main.py
+```
+- API starts at `http://127.0.0.1:8000` (and `http://0.0.0.0:8000`).
+- Health check available at `http://127.0.0.1:8000/health`.
+- Interactive OpenAPI docs at `http://127.0.0.1:8000/docs`.
+
+### Terminal 2 — Frontend Development Server
+```powershell
+cd C:\wildsense\frontend
+npm run dev -- -H 0.0.0.0
+```
+- Web application opens at `http://localhost:3000`.
+- The `-H 0.0.0.0` flag binds the dev server to all network interfaces, allowing phones on your local Wi-Fi to connect.
+
+---
+
+## 📱 Mobile Field Testing Instructions
+
+WildSense is designed as a **mobile field companion**. To test it on your physical phone:
+
+1. **Connect to the Same Wi-Fi**: Ensure your smartphone and development laptop are on the same local Wi-Fi network.
+2. **Find Your Laptop's Local IP**:
+   In PowerShell, run:
+   ```powershell
+   ipconfig
    ```
-   Local Ollama Vision Model (e.g. moondream)
-             ↓ [if unavailable or uninstalled]
-   Local In-Memory Spectral CV Analyzer (MockVisionProvider)
-             ↓ [if image unreadable or corrupted]
-   Unknown Nature Object Safety Fallback
+   Look for `IPv4 Address` under your active Wi-Fi adapter (e.g., `192.168.0.193`).
+3. **Open on Phone Browser**:
+   Open Chrome or Safari on your phone and navigate to:
+   ```text
+   http://192.168.0.193:3000
    ```
-3. **Honest Provider Labeling**: When fallback heuristics run, the system labels the provider as `local_cv_fallback` rather than faking neural network results.
-
----
-
-## Why Open AI Matters
-
-WildSense is designed around interchangeable local models.
-
-The application does not depend on a single proprietary AI API.
-
-A local vision model handles perception.
-
-An open-weight reasoning model such as Gemma or Qwen handles mission generation.
-
-The safety and scoring layers remain deterministic application code.
-
-This means researchers and developers can inspect, replace, benchmark, and improve each part independently.
-
-The result is not just an AI application.
-
-It is an open architecture for turning AI into a bridge toward the physical world.
+   *(Replace with your actual IP address).*
+4. **Dynamic API Routing**:
+   WildSense's API client automatically detects `window.location.hostname` and routes backend requests directly to `http://192.168.0.193:8000/api`.
+5. **Camera Access**:
+   Tap **"Take Photo"** on the mobile screen to trigger your phone's native camera via HTML5 file capture (`capture="environment"`).
 
 ---
 
 ## 🔒 Privacy & Local Processing Guarantee
 
-- **Zero Cloud Image Processing**: Camera images are processed strictly on localhost (`127.0.0.1`). No cloud vision APIs, remote endpoints, or tracking servers are ever contacted.
-- **In-Memory Volatility**: Images are validated and analyzed directly in memory via byte streams (`io.BytesIO`). They are never permanently saved to disk or exposed to external services.
+- **Zero Cloud Image Uploads**: Specimen photographs are never transmitted to external cloud APIs or remote tracking services.
+- **In-Memory Stream Processing**: Images are processed directly in RAM via `io.BytesIO` streams and immediately released. They are not permanently stored on disk unless explicitly logged by the user into the local journal.
+- **Offline Telemetry-Free Design**: All SQLite journal records, exploration history, and Grass Scores stay exclusively on the host device.
 
 ---
 
-## 🎙️ Voice Missions: ElevenLabs & Offline Audio Integration (Task 6)
+## ⚠️ Model Provenance, Licensing & Known Limitations
 
-> **"The best interface for a nature mission is one that lets you stop looking at the interface."**
+### 1. Research Licensing Notice
+- The Indian Flora Specialist was trained on 133 curated botanical images from iNaturalist (`data/specialist_dataset/`).
+- **License Distribution**: 88.0% `CC-BY-NC`, 8.3% `CC-BY`, 1.5% `CC-BY-NC-SA`, 1.5% `CC-BY-SA`, 0.8% `CC0`.
+- **Usage Restriction**: Because 89.5% of images carry Non-Commercial restrictions, **the specialist weights are strictly for educational hackathons, open research, and demonstration purposes**. They must not be deployed commercially without relitigating training asset licenses.
 
-In digital wellness, audio is a bridge. Rather than reading text on a glass screen, users listen to a calm, 15–30 second spoken mission instruction, pocket their device, and engage their eyes and hands directly with the living world.
+### 2. Recognition Limitations & Abstention
+- **Conservative Dev Thresholds**: The specialist's multi-gate arbitration policy enforces high acceptance thresholds ($\tau \ge 0.68\text{--}0.72$) and a strict margin gate ($\Delta \ge 0.035$). It prioritizes safety over raw coverage: on unseen test specimens, it achieves **100% precision (13/13)** among accepted predictions, but safely abstains on 53.6% of images, falling back to the global model.
+- **Sweet Basil vs. Tulsi Ambiguity**: Vegetative leaves of Sweet Basil (*Ocimum basilicum*) and Holy Basil / Tulsi (*Ocimum tenuiflorum*) share high visual similarity. The system flags Tulsi as `genus_confirmed` and attaches an explicit floral spike warning rather than asserting false certainty.
+- **Optical Checks vs. Botanical Content**: Pixel variance checks flag blank or underexposed surfaces, but **textured non-plants** (e.g. granite rocks, brick walls) pass variance filters. WildSense relies on similarity score thresholds and epistemic uncertainty warnings, not an infallible non-plant classifier.
 
-```text
-       [ Approved Mission ]
-                 ↓
-  format_mission_narration()
-  (Title • Duration • Action • Goal • Safety)
-                 ↓
-      ┌──────────────────────┐
-      │   Provider Router    │
-      └──────────┬───────────┘
-                 │
-        ┌────────┴────────┐
-        ▼                 ▼
-[ ElevenLabs API ]   [ Browser Web Speech ]
-• High-Fidelity TTS  • 100% Offline & Private
-• Flash v2.5 Model   • Zero External Network
-• In-Memory Audio    • Instant SpeechSynthesis
-        │                 │
-        └────────┬────────┘
-                 ▼
-       [ User Listens ]
-                 ↓
-       [ PHONE IN POCKET ]
-```
-
-### 1. Architectural Highlights
-- **Optional Online Enhancement**: WildSense reasoning (Gemma/Qwen), local vision (Moondream/CV), and journal persistence (SQLite) remain 100% offline. ElevenLabs is an optional voice upgrade.
-- **Genuine API Integration**: Calls the official ElevenLabs Text-to-Speech API (`POST https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`) using the low-latency `eleven_flash_v2_5` model.
-- **In-Memory Audio Processing**: Audio bytes are synthesized directly in RAM and transmitted via base64 data URIs or binary responses (`audio/mpeg`). No audio files are written to persistent disk.
-- **Graceful Deterministic Fallback**: If ElevenLabs is unconfigured, rate-limited (`429`), unauthorized (`401`), or offline, WildSense immediately falls back to local browser speech synthesis (`window.speechSynthesis`) with an honest, transparent status badge.
-- **Strict Data Isolation**: Specimen photographs, location coordinates, SQLite journals, and personal reflections are **never** transmitted to ElevenLabs. Only the concise spoken mission instruction is sent.
-
-### 2. Environment Configuration
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-
-Configure audio settings in `.env`:
-```env
-# Options: "browser" (default offline speech synthesis) or "elevenlabs"
-AUDIO_PROVIDER=elevenlabs
-
-# Optional ElevenLabs Settings (Do not commit secrets to git)
-ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
-ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL
-ELEVENLABS_MODEL_ID=eleven_flash_v2_5
-```
-
-### 3. Voice Endpoints
-- `GET /api/audio/status`: Returns current provider readiness, voice configuration, and browser speech support without exposing secrets.
-- `POST /api/audio`: Generates mission narration. Accepts either raw text or structured mission parameters (`title`, `instruction`, `physical_action`, `observation_goal`, `safety_note`, `estimated_minutes`). Returns playback cues and in-memory audio data URIs.
-- `POST /api/audio/raw`: Streams binary `audio/mpeg` bytes directly for native audio players.
-
-### 4. Verification & Testing
-- **Unit Tests with Mocks (No API Key Required)**:
-  ```bash
-  pytest backend/tests/test_wildsense.py -v
-  ```
-  Runs 44 unit tests covering configuration defaults, request construction, error handling, rate limiting, timeout handling, safe fallbacks, content types, and privacy isolation.
-- **End-to-End Pipeline Verification**:
-  ```bash
-  python test_e2e.py
-  ```
-  Validates the full 9-step pipeline: Health -> Vision -> Recognition -> Session -> Mission -> Audio (Browser & ElevenLabs branches) -> Grass Score -> SQLite Journal.
-- **Live ElevenLabs API Verification**:
-  Tested and verified against live ElevenLabs API (`eleven_flash_v2_5` with voice `EXAVITQu4vr4xnSDxMaL`) producing valid `audio/mpeg` streams in real time.
+### 3. Production Configuration
+- `ENABLE_INDIAN_FLORA_SPECIALIST=false` is set by default in [`.env.example`](file:///c:/wildsense/.env.example) and [`backend/config.py`](file:///c:/wildsense/backend/config.py). The production release relies on the proven 4,271-taxa global baseline.
 
 ---
 
-## 🏛️ System Architecture
+## 🧪 Verification & Automated Testing
 
-```
-wildsense/
-├── frontend/               # Next.js 16 (React 19, TypeScript, Tailwind CSS)
-│   ├── app/
-│   │   ├── page.tsx        # Mobile-First Field Companion UI (Camera, Field Mode, Audio Guide)
-│   │   ├── layout.tsx      # Viewport & Metadata setup
-│   │   └── globals.css     # Organic nature styling & tokens
-│   ├── lib/
-│   │   └── api.ts          # Resilient API client (multipart recognition & audio providers)
-│   └── package.json
-├── backend/                # Python FastAPI server
-│   ├── main.py             # App entrypoint & lifespan events
-│   ├── config.py           # Model and environment configurations (.env supported)
-│   ├── database.py         # Local SQLite engine
-│   ├── models.py           # SQLAlchemy session & journal schemas
-│   ├── api/
-│   │   └── routes.py       # REST API endpoints (/health, /recognize, /mission, /audio, etc.)
-│   └── services/
-│       ├── audio_provider.py # ElevenLabsAudioProvider, BrowserAudioProvider, format_mission_narration
-│       ├── vision_provider.py # VisionProvider, OllamaVisionProvider, MockVisionProvider
-│       ├── recognizer.py   # Pluggable nature CV recognizer & demo presets
-│       ├── ai_provider.py  # Modular AIProvider & MockProvider
-│       ├── ollama_provider.py # Local Ollama connector (think: false, configurable model)
-│       ├── mission_generator.py # Physical observation mission generator (10 safety rules)
-│       ├── grass_score.py  # World / Screen ratio calculation
-│       └── journal.py      # SQLite journal manager
-├── data/
-│   └── wildsense.db        # SQLite database (Zero cloud required)
-├── test_e2e.py             # Complete Task 3-6 end-to-end verification script
-└── README.md
-```
+Run the full verification suite locally:
 
+```powershell
+# 1. Run backend unit and integration test suite (79 tests)
+pytest -v
 
----
+# 2. Reproduce the Stage 6 dual-model arbitration benchmark
+python evaluate_arbitration.py
 
-## 🚀 Quick Start
-
-### 1. Prerequisites
-- **Python 3.11+**
-- **Node.js 18+** & **npm**
-- **Ollama** installed locally
-
-### 2. Configure Environment (Optional)
-Edit `.env`:
-```env
-OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=qwen3:4b
-VISION_MODEL=moondream
-```
-
-### 3. Start the Backend
-```bash
-cd backend
-python main.py
-```
-Backend runs at `http://127.0.0.1:8000`.  
-Interactive API docs available at `http://127.0.0.1:8000/docs`.
-
-### 4. Start the Frontend
-```bash
+# 3. Test frontend production build
 cd frontend
-npm run dev
+npm run build
+cd ..
 ```
-Frontend runs at `http://localhost:3000`.
 
 ---
 
-## 🔍 API Endpoints
+## 📄 License & Attribution
 
-- `GET /health`: Exposes backend health, Ollama status, configured reasoning model, configured vision model, and `vision_available` flag.
-- `POST /api/recognize`: Unified recognition accepting `multipart/form-data` with `image` file or JSON with `preset_id`/`image_base64`.
-- `POST /api/mission`: Generates phone-free physical observation missions conforming to the 10 Nature Mission Safety Rules. Includes latency diagnostics (`llm_inference_ms`).
-- `POST /api/sessions`: Creates an exploration session in SQLite.
-- `POST /api/sessions/{id}/complete`: Concludes session, calculates Grass Score, and stores AI reflection.
-- `GET /api/journal`: Retrieves offline field journal history.
-- `GET /api/grass-score`: Calculates World-to-Screen engagement ratio.
-- `GET /api/stats`: Aggregate lifetime nature discovery statistics.
-
----
-
-## 🧭 The 10 Nature Mission Rules
-
-All generated missions strictly obey WildSense safety principles:
-1. Require physical interaction or observation (inspect, compare, listen, notice).
-2. Possible without continuously looking at the phone.
-3. Short and focused (2–3 minutes).
-4. Encourage curiosity over passive consumption.
-5. **Never require damaging nature** (no picking, snapping, or breaking).
-6. **Never tell users to eat, touch, collect, or approach potentially hazardous species**.
-7. Never disturb wildlife, nests, or burrows.
-8. Never require entering dangerous terrain or trespassing.
-9. Prefer sensory observation over photography.
-10. Strictly avoid generic web search prompts.
-
----
-
-## ⚠️ Limitations & Hardware Boundaries
-
-1. **Lightweight CPU Vision**: Running large vision models (e.g. `llava:7b` or `llama3.2-vision:11b`) on a dual-core Intel Core i3 without a dedicated GPU causes extreme RAM pressure and >60s latency. For hardware with <= 12 GB RAM, lightweight models (`moondream`, 829 MB) or the built-in local CV in-memory fallback provide the best balance of speed and stability.
-2. **Model Swapping on CPU**: If both a vision model and an LLM are configured in Ollama on a system with limited RAM, Ollama will unload and reload weights between `/recognize` and `/mission`. The in-memory `MockVisionProvider` prevents this swap overhead entirely while keeping vision processing local.
+- **Application Code**: MIT License.
+- **Global Vision Model**: FastViT botanical vision backbone distilled on open botanical datasets.
+- **Specialist Dataset**: Curated from iNaturalist under research licenses (CC-BY-NC / CC-BY). See [`data/specialist_dataset/metadata.json`](file:///c:/wildsense/data/specialist_dataset/metadata.json) for individual photographer attributions and license URLs.

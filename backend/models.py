@@ -43,3 +43,50 @@ class SessionRecord(Base):
     
     # Status: 'started', 'field_active', 'completed', 'abandoned'
     status: Mapped[str] = mapped_column(String, default="started")
+
+
+class PlantRecord(Base):
+    __tablename__ = "plants"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    scientific_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    canonical_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    family: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    genus: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    species: Mapped[str] = mapped_column(String, nullable=False)
+    synonyms: Mapped[str] = mapped_column(Text, default="[]")
+    common_names: Mapped[str] = mapped_column(Text, default="[]")
+    regional_names: Mapped[str] = mapped_column(Text, default="{}")
+    category: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    growth_type: Mapped[str] = mapped_column(String, default="herb")
+    habitat: Mapped[str] = mapped_column(Text, default="")
+    flowering_season: Mapped[str] = mapped_column(String, default="")
+    description: Mapped[str] = mapped_column(Text, default="")
+    distinguishing_characteristics: Mapped[str] = mapped_column(Text, default="")
+    safety_notes: Mapped[str] = mapped_column(Text, default="")
+    confusable_species: Mapped[str] = mapped_column(Text, default="[]")
+    image_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    def to_dict(self):
+        import json
+        return {
+            "id": self.id,
+            "scientific_name": self.scientific_name,
+            "canonical_name": self.canonical_name,
+            "family": self.family,
+            "genus": self.genus,
+            "species": self.species,
+            "synonyms": json.loads(self.synonyms) if self.synonyms else [],
+            "common_names": json.loads(self.common_names) if self.common_names else [],
+            "regional_names": json.loads(self.regional_names) if self.regional_names else {},
+            "category": self.category,
+            "growth_type": self.growth_type,
+            "habitat": self.habitat,
+            "flowering_season": self.flowering_season,
+            "description": self.description,
+            "distinguishing_characteristics": self.distinguishing_characteristics,
+            "safety_notes": self.safety_notes,
+            "confusable_species": json.loads(self.confusable_species) if self.confusable_species else [],
+            "image_url": self.image_url,
+        }
+

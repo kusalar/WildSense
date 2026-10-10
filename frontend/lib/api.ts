@@ -1,4 +1,25 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+/**
+ * Resolves the backend API base URL.
+ * Supports:
+ * 1. Explicit NEXT_PUBLIC_API_URL environment variable override.
+ * 2. Dynamic client-side resolution based on window.location.hostname
+ *    (ensuring mobile phones connecting via 192.168.0.x hit 192.168.0.x:8000
+ *    instead of mistakenly calling the phone's own localhost:8000).
+ * 3. Fallback to http://127.0.0.1:8000/api during SSR or local desktop use.
+ */
+export function getApiBase(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, "");
+  }
+  if (typeof window !== "undefined" && window.location?.hostname) {
+    return `http://${window.location.hostname}:8000/api`;
+  }
+  return "http://127.0.0.1:8000/api";
+}
+
+export function getBackendBase(): string {
+  return getApiBase().replace(/\/api$/, "");
+}
 
 export interface HealthStatus {
   status: string;
@@ -9,17 +30,81 @@ export interface HealthStatus {
   vision_available: boolean;
   available_models: string[];
   mode: string;
+  onnx_available?: boolean;
+  onnx_model?: string;
+  specialist_available?: boolean;
+  specialist_enabled?: boolean;
+}
+
+export interface CandidateTaxon {
+  rank: number;
+  scientific_name: string;
+  common_name?: string | null;
+  regional_names?: {
+    hi?: string[];
+    bn?: string[];
+    ta?: string[];
+    [key: string]: string[] | undefined;
+  };
+  similarity_score?: number;
+  cosine_score: number;
+  match_level?: "exact" | "genus" | "family" | "uncatalogued" | string;
+  family?: string | null;
+  database_id?: string | null;
+}
+
+export interface IndividualPhotoResult {
+  photo_index: number;
+  scientific_name: string;
+  similarity_score: number;
+  match_level: string;
+  quality_warnings?: string[];
 }
 
 export interface RecognizeResult {
   category: string;
   common_name: string;
   confidence: number;
+  similarity_score?: number;
   description: string;
   uncertainty: string;
   inference_ms?: number;
   provider?: string;
+  scientific_name?: string;
+  raw_cosine?: number;
+  organ_type?: string;
+  organ_tip?: string;
+  match_level?: string;
+  match_details?: string;
+  photos_count?: number;
+  aggregation?: string;
+  individual_photos?: IndividualPhotoResult[];
+  candidates?: CandidateTaxon[];
+  image_quality?: {
+    width: number;
+    height: number;
+    brightness: number;
+    variance: number;
+    acceptable: boolean;
+    warnings: string[];
+  };
+  arbitration?: {
+    enabled: boolean;
+    decision: string;
+    chosen_source?: string;
+    use_specialist?: boolean;
+    specialist_candidate?: string;
+    specialist_score?: number;
+    specialist_margin?: number;
+    specialist_threshold?: number;
+    global_candidate?: string;
+    global_score?: number;
+    genus_concordance?: boolean;
+    warnings?: string[];
+  };
 }
+
+
 
 export interface MissionResult {
   title: string;
@@ -126,7 +211,7 @@ export interface JournalEntry {
 
 export async function fetchHealth(): Promise<HealthStatus> {
   try {
-    const res = await fetch(`${API_BASE.replace('/api', '')}/health`, { cache: "no-store" });
+    const res = await fetch(`${getBackendBase()}/health`, { cache: "no-store" });
     if (!res.ok) throw new Error("Health check failed");
     return await res.json();
   } catch (err) {
@@ -144,7 +229,7 @@ export async function fetchHealth(): Promise<HealthStatus> {
 
 export async function fetchPresets(): Promise<Record<string, RecognizeResult>> {
   try {
-    const res = await fetch(`${API_BASE}/presets`);
+    const res = await fetch(`${getApiBase()}/presets`);
     if (!res.ok) throw new Error("Presets fetch failed");
     return await res.json();
   } catch {
@@ -199,7 +284,14 @@ export async function fetchPresets(): Promise<Record<string, RecognizeResult>> {
 }
 
 export type RecognizeInput =
-  | { imageFile?: File | null; imageBase64?: string | null; presetId?: string | null }
+  | {
+      imageFile?: File | null;
+      imageFiles?: File[] | null;
+      imageBase64?: string | null;
+      imagesBase64?: string[] | null;
+      presetId?: string | null;
+      organType?: string | null;
+    }
   | File
   | string;
 
@@ -207,33 +299,50 @@ export async function recognizeObject(
   param1?: RecognizeInput | null,
   param2?: string | null
 ): Promise<RecognizeResult> {
-  let imageFile: File | null = null;
-  let imageBase64: string | null = null;
+  let imageFiles: File[] = [];
+  let imagesBase64: string[] = [];
   let presetId: string | null = null;
+  let organType: string = "whole_plant";
 
   if (param1 instanceof File) {
-    imageFile = param1;
+    imageFiles = [param1];
     if (param2) presetId = param2;
   } else if (typeof param1 === "string") {
     if (param1.startsWith("data:") || param1.length > 80) {
-      imageBase64 = param1;
+      imagesBase64 = [param1];
     } else {
       presetId = param1;
     }
     if (param2) presetId = param2;
   } else if (param1 && typeof param1 === "object") {
-    imageFile = param1.imageFile || null;
-    imageBase64 = param1.imageBase64 || null;
+    if (param1.imageFiles && param1.imageFiles.length > 0) {
+      imageFiles = param1.imageFiles;
+    } else if (param1.imageFile) {
+      imageFiles = [param1.imageFile];
+    }
+
+    if (param1.imagesBase64 && param1.imagesBase64.length > 0) {
+      imagesBase64 = param1.imagesBase64;
+    } else if (param1.imageBase64) {
+      imagesBase64 = [param1.imageBase64];
+    }
+
     presetId = param1.presetId || null;
+    if (param1.organType) {
+      organType = param1.organType;
+    }
   }
 
   try {
-    // 1. If real image file uploaded, send via multipart/form-data
-    if (imageFile) {
+    // 1. If real image file(s) uploaded, send via multipart/form-data
+    if (imageFiles.length > 0) {
       const formData = new FormData();
-      formData.append("image", imageFile);
+      for (const f of imageFiles.slice(0, 3)) {
+        formData.append("images", f);
+      }
+      formData.append("organ_type", organType);
       if (presetId) formData.append("preset_id", presetId);
-      const res = await fetch(`${API_BASE}/recognize`, {
+      const res = await fetch(`${getApiBase()}/recognize`, {
         method: "POST",
         body: formData,
       });
@@ -242,13 +351,24 @@ export async function recognizeObject(
     }
 
     // 2. Otherwise send JSON payload
-    const res = await fetch(`${API_BASE}/recognize`, {
+    const body: Record<string, unknown> = {
+      preset_id: presetId,
+      organ_type: organType,
+    };
+    if (imagesBase64.length > 1) {
+      body.images_base64 = imagesBase64.slice(0, 3);
+    } else if (imagesBase64.length === 1) {
+      body.image_base64 = imagesBase64[0];
+    }
+
+    const res = await fetch(`${getApiBase()}/recognize`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image_base64: imageBase64, preset_id: presetId }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error("Recognition failed");
     return await res.json();
+
   } catch {
     // Local fallback
     if (presetId === "demo_flower") {
@@ -314,7 +434,7 @@ export async function createMission(params: {
   sessionId?: string;
 }): Promise<MissionResult> {
   try {
-    const res = await fetch(`${API_BASE}/mission`, {
+    const res = await fetch(`${getApiBase()}/mission`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -352,7 +472,7 @@ export interface AudioRequestParams {
 
 export async function fetchAudioStatus(): Promise<AudioStatus> {
   try {
-    const res = await fetch(`${API_BASE}/audio/status`);
+    const res = await fetch(`${getApiBase()}/audio/status`);
     if (!res.ok) throw new Error("Audio status request failed");
     return await res.json();
   } catch {
@@ -375,7 +495,7 @@ export async function fetchAudioNarration(
     : { ...params, provider: preferredProvider || params.provider };
 
   try {
-    const res = await fetch(`${API_BASE}/audio`, {
+    const res = await fetch(`${getApiBase()}/audio`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -407,7 +527,7 @@ export async function createSession(params: {
   description?: string;
 }): Promise<{ id: string }> {
   try {
-    const res = await fetch(`${API_BASE}/sessions`, {
+    const res = await fetch(`${getApiBase()}/sessions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params),
@@ -430,7 +550,7 @@ export async function completeSession(sessionId: string, params: {
   ai_reflection?: string;
 }> {
   try {
-    const res = await fetch(`${API_BASE}/sessions/${sessionId}/complete`, {
+    const res = await fetch(`${getApiBase()}/sessions/${sessionId}/complete`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params),
@@ -541,7 +661,7 @@ export async function completeSession(sessionId: string, params: {
 
 export async function fetchJournal(): Promise<JournalEntry[]> {
   try {
-    const res = await fetch(`${API_BASE}/journal`);
+    const res = await fetch(`${getApiBase()}/journal`);
     if (!res.ok) throw new Error("Journal fetch failed");
     return await res.json();
   } catch {
@@ -551,7 +671,7 @@ export async function fetchJournal(): Promise<JournalEntry[]> {
 
 export async function selectModel(model: string): Promise<{ status: string; active_model: string }> {
   try {
-    const res = await fetch(`${API_BASE}/models/select`, {
+    const res = await fetch(`${getApiBase()}/models/select`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model })
@@ -562,3 +682,78 @@ export async function selectModel(model: string): Promise<{ status: string; acti
     return { status: "local", active_model: model };
   }
 }
+
+export interface PlantProfile {
+  id: string;
+  scientific_name: string;
+  canonical_name: string;
+  family: string;
+  genus: string;
+  species: string;
+  synonyms: string[];
+  common_names: string[];
+  regional_names: Record<string, string[]>;
+  category: string;
+  growth_type: string;
+  habitat: string;
+  flowering_season: string;
+  description: string;
+  distinguishing_characteristics: string;
+  safety_notes: string;
+  confusable_species: string[];
+  image_url?: string | null;
+}
+
+export interface PlantCategory {
+  category: string;
+  count: number;
+}
+
+export async function fetchPlants(category?: string, limit: number = 120): Promise<PlantProfile[]> {
+  try {
+    const url = new URL(`${getApiBase()}/plants`);
+    if (category && category !== "all") url.searchParams.append("category", category);
+    url.searchParams.append("limit", limit.toString());
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error("Failed to fetch plants");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchPlants error:", err);
+    return [];
+  }
+}
+
+export async function searchPlants(query: string, category?: string): Promise<PlantProfile[]> {
+  try {
+    const url = new URL(`${getApiBase()}/plants/search`);
+    url.searchParams.append("q", query);
+    if (category && category !== "all") url.searchParams.append("category", category);
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error("Search failed");
+    return await res.json();
+  } catch (err) {
+    console.error("searchPlants error:", err);
+    return [];
+  }
+}
+
+export async function fetchPlantDetail(id: string): Promise<PlantProfile | null> {
+  try {
+    const res = await fetch(`${getApiBase()}/plants/${encodeURIComponent(id)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchPlantCategories(): Promise<PlantCategory[]> {
+  try {
+    const res = await fetch(`${getApiBase()}/plants/categories`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+

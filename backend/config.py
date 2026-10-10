@@ -28,8 +28,11 @@ DEFAULT_MODEL = REASONING_MODEL
 # Configurable vision model: defaults to moondream
 VISION_MODEL = os.getenv("VISION_MODEL", "moondream")
 
-# Server Configuration
-HOST = os.getenv("HOST", "127.0.0.1")
+# Feature flag for Stage 5 Indian Flora Specialist Arbitration (disabled by default)
+ENABLE_INDIAN_FLORA_SPECIALIST = os.getenv("ENABLE_INDIAN_FLORA_SPECIALIST", "false").lower() in ("true", "1", "yes")
+
+# Server Configuration (0.0.0.0 allows access from local machine and phone on Wi-Fi)
+HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", 8000))
 
 # Audio / TTS Configuration (Task 6)
@@ -45,6 +48,8 @@ CORS_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://192.168.0.193:3000",
+    "http://192.168.0.193:8000",
     "*"
 ]
 
